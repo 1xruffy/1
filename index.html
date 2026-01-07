@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Business Performance Dashboard</title>
+
+  <style>
+    /* ------------------------------
+       COLOR SYSTEM (UPGRADED)
+    ------------------------------ */
+    :root {
+      --bg-main: #080b12;
+      --bg-card: #111827;
+      --bg-card-alt: #0d121c;
+      --text-light: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+
+      --green-1: #34d399;
+      --green-2: #10b981;
+      --green-grad: linear-gradient(135deg, #34d399, #10b981);
+
+      --orange: #fb923c;
+      --red: #ef4444;
+
+      --border: #1f2937;
+      --border-soft: #374151;
+
+      --glow-green: rgba(52, 211, 153, 0.35);
+      --glow-green-soft: rgba(52, 211, 153, 0.15);
+    }
+
+    /* ------------------------------
+       GLOBAL
+    ------------------------------ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: var(--bg-main);
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .app-wrapper {
+      width: 960px;
+      background: radial-gradient(circle at top left, #1a2234 0%, #080b12 60%);
+      border-radius: 20px;
+      padding: 26px;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    /* ------------------------------
+       TOP BAR
+    ------------------------------ */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .logo-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--green-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #02120a;
+      font-size: 14px;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-title {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.8);
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green-1);
+    }
+
+    .date-range {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.8);
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ------------------------------
+       HEADER
+    ------------------------------ */
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .main-title {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .main-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .toggle-group {
+      display: inline-flex;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+
+    .toggle-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toggle-btn.active {
+      background: #0f172a;
+      color: var(--text-light);
+    }
+
+    /* ------------------------------
+       SUMMARY CARDS
+    ------------------------------ */
+    .summary-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: var(--bg-card-alt);
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .summary-value.small {
+      font-size: 22px;
+    }
+
+    .summary-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .summary-sub span {
+      color: var(--green-1);
+    }
+
+    .summary-sub span.negative {
+      color: var(--orange);
+    }
+
+    .summary-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.8);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* ------------------------------
+       CHART
+    ------------------------------ */
+    .chart-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .chart-title {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 10px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-grad);
+    }
+
+    .legend-dot.secondary {
+      background: #4b5563;
+    }
+
+    .chart-body {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 8px;
+    }
+
+    .chart-y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-soft);
+    }
+
+    .chart-area {
+      height: 210px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top, var(--glow-green-soft), transparent 60%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .chart-grid-line:nth-child(1) { top: 12%; }
+    .chart-grid-line:nth-child(2) { top: 32%; }
+    .chart-grid-line:nth-child(3) { top: 52%; }
+    .chart-grid-line:nth-child(4) { top: 72%; }
+    .chart-grid-line:nth-child(5) { top: 92%; }
+
+    .chart-curve {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(52, 211, 153, 0.1), rgba(52, 211, 153, 0.5), rgba(52, 211, 153, 0.1));
+      clip-path: polygon(
+        0% 70%, 10% 68%, 20% 65%, 30% 60%, 40% 50%, 50% 30%,
+        60% 20%, 70% 35%, 80% 55%, 90% 65%, 100% 60%, 100% 100%, 0% 100%
+      );
+    }
+
+    .chart-line-stroke {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 1), rgba(52, 211, 153, 0.2));
+      clip-path: polygon(
+        0% 70%, 10% 68%, 20% 65%, 30% 60%, 40% 50%, 50% 30%,
+        60% 20%, 70% 35%, 80% 55%, 90% 65%, 100% 60%
+      );
+    }
+
+    .chart-x-axis {
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-soft);
+    }
+
+    /* ------------------------------
+       BOTTOM CARDS
+    ------------------------------ */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1.4fr 1.2fr;
+      gap: 14px;
+    }
+
+    .bottom-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .bottom-card-title {
+      margin-bottom: 6px;
+    }
+
+    .bottom-card-main {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .bottom-card-value {
+      font-size: 20px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .bottom-card-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 10px;
+      color: var(--text-light);
+    }
+
+    .risk-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--orange);
+      margin-top: 4px;
+    }
+
+    .risk-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    /* ------------------------------
+       FOOTNOTE
+    ------------------------------ */
+    .note-text {
+      position: absolute;
+      bottom: 14px;
+      right: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .note-text span {
+      color: var(--text-light);
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-wrapper">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="logo-circle">S</div>
+        <div class="top-title">Store dashboard</div>
+      </div>
+
+      <div class="top-right">
+        <div class="pill">
+          <div class="pill-dot"></div>
+          <span>Live store · Online</span>
+        </div>
+
+        <div class="date-range">
+          <span>Jan 1, 2024</span>
+          <span>–</span>
+          <span>Dec 31, 2025</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="main-header">
+      <div>
+        <div class="main-title">Total sales</div>
+        <div class="main-subtitle">Includes taxes, shipping and discounts</div>
+      </div>
+
+      <div>
+        <span style="font-size:11px;color:var(--text-muted);margin-right:6px;">Compare to</span>
+        <div class="toggle-group">
+          <div class="toggle-btn active">Previous period</div>
+          <div class="toggle-btn">Previous year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-label">Total sales</div>
+        <div class="summary-value">£102,630.65</div>
+        <div class="summary-sub"><span>+48%</span> vs previous period</div>
+        <div class="summary-badge">Online store</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">Orders</div>
+        <div class="summary-value small">5.39K</div>
+        <div class="summary-sub"><span>+32%</span> vs previous period</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">Conversion rate</div>
+        <div class="summary-value small">3.08%</div>
+        <div class="summary-sub"><span>+0.6 pts</span> vs previous period</div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Sales over time</div>
+
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot"></div>
+            <span>Current period</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot secondary"></div>
+            <span>Previous period</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-body">
+        <div class="chart-y-axis">
+          <span>£40k</span>
+          <span>£30k</span>
+          <span>£20k</span>
+          <span>£10k</span>
+          <span>£0</span>
+        </div>
+
+        <div>
+          <div class="chart-area">
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+            <div class="chart-grid-line"></div>
+
+            <div class="chart-curve"></div>
+            <div class="chart-line-stroke"></div>
+          </div>
+
+          <div class="chart-x-axis">
+            <span>Jan 24</span>
+            <span>May 24</span>
+            <span>Sep 24</span>
+            <span>Jan 25</span>
+            <span>May 25</span>
+            <span>Sep 25</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <div class="bottom-card">
+        <div class="bottom-card-title">Orders to fulfill</div>
+        <div class="bottom-card-main">
+          <div class="bottom-card-value">23</div>
+          <div class="bottom-card-pill">View orders</div>
+        </div>
+        <div class="bottom-card-sub"><span>+5</span> since yesterday</div>
+      </div>
+
+      <div class="bottom-card">
+        <div class="bottom-card-title">Unfulfilled revenue</div>
+        <div class="bottom-card-main">
+          <div class="bottom-card-value">£4,920.40</div>
+        </div>
+        <div class="bottom-card-sub"><span class="negative">-£320.10</span> vs last week</div>
+      </div>
+
+      <div class="bottom-card">
+        <div class="bottom-card-title">Risk & review</div>
+        <div class="bottom-card-main">
+          <div class="bottom-card-value">1</div>
+        </div>
+        <div class="risk-pill">
+          <div class="risk-dot"></div>
+          <span>High risk order</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTNOTE -->
+    <div class="note-text">
+      Solo business is <span>fun...</span>
+    </div>
+
+  </div>
+</body>
+</html>
